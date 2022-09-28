@@ -256,7 +256,7 @@ class BartAttention(nn.Module):
             attn_weights = attn_weights.view(bsz * self.num_heads, tgt_len, src_len)
 
         attn_weights = nn.functional.softmax(attn_weights, dim=-1)
-        attn_weights = gaussian_noise(attn_weights)
+        #attn_weights = gaussian_noise(attn_weights)
 
         if layer_head_mask is not None:
             if layer_head_mask.size() != (self.num_heads,):
