@@ -24,6 +24,18 @@ import torch.utils.checkpoint
 from torch import nn
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
 
+import numpy as np
+def gaussian_noise(x,mu = 0.2,std_mul = 0.05):
+    x = np.array(x.tolist())
+    std = std_mul * np.std(x)
+    noise = np.random.normal(mu, std, size = x.shape)
+    x_noisy = x + noise
+        
+    x_noisy = x_noisy.astype(np.float32)
+    x_noisy = torch.tensor(x_noisy)
+    
+    return x_noisy 
+
 from ...activations import ACT2FN
 from ...modeling_outputs import (
     BaseModelOutput,
@@ -244,6 +256,7 @@ class BartAttention(nn.Module):
             attn_weights = attn_weights.view(bsz * self.num_heads, tgt_len, src_len)
 
         attn_weights = nn.functional.softmax(attn_weights, dim=-1)
+        attn_weights = gaussian_noise(attn_weights)
 
         if layer_head_mask is not None:
             if layer_head_mask.size() != (self.num_heads,):
