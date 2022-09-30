@@ -1275,6 +1275,7 @@ class BartModel(BartPretrainedModel):
                 hidden_states=encoder_outputs[1] if len(encoder_outputs) > 1 else None,
                 attentions=encoder_outputs[2] if len(encoder_outputs) > 2 else None,
             )
+            print("Setting blur off")
             blur = False
 
         # decoder outputs consists of (dec_features, past_key_value, dec_hidden, dec_attn)
