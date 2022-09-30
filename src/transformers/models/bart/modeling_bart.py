@@ -848,7 +848,7 @@ class BartEncoder(BartPretrainedModel):
                     f"The head_mask should be specified for {len(self.layers)} layers, but it is for"
                     f" {head_mask.size()[0]}."
                 )
-        print(hidden_states.shape, blurred_input_ids.shape)
+        #print(hidden_states.shape, blurred_input_ids.shape)
         for idx, encoder_layer in enumerate(self.layers):
             if output_hidden_states:
                 encoder_states = encoder_states + (hidden_states,)
@@ -870,7 +870,7 @@ class BartEncoder(BartPretrainedModel):
                         hidden_states,
                         attention_mask,
                         (head_mask[idx] if head_mask is not None else None),
-                        blurred_input_ids=blurred_input_ids,
+                        blurred_input_ids=blurred_input_ids + embed_pos,
                     )
                 else:
                     layer_outputs = encoder_layer(
@@ -878,7 +878,7 @@ class BartEncoder(BartPretrainedModel):
                         attention_mask,
                         layer_head_mask=(head_mask[idx] if head_mask is not None else None),
                         output_attentions=output_attentions,
-                        blurred_input_ids=blurred_input_ids,
+                        blurred_input_ids=blurred_input_ids + embed_pos,
                     )
 
                 hidden_states = layer_outputs[0]
