@@ -827,7 +827,7 @@ class BartEncoder(BartPretrainedModel):
 
         embed_pos = self.embed_positions(input)
 
-        hidden_states = input_ids + embed_pos
+        hidden_states = inputs_embeds + embed_pos
         hidden_states = self.layernorm_embedding(hidden_states)
         hidden_states = nn.functional.dropout(hidden_states, p=self.dropout, training=self.training)
 
