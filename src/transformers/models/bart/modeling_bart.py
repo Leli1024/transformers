@@ -343,7 +343,7 @@ class BartEncoderLayer(nn.Module):
             output_attentions=output_attentions,
         )
         
-        if (blur):
+        if (blurred_input_ids is not None):
             
             hidden_states, _, _ = self.self_attn(
                 hidden_states=blurred_input_ids,
