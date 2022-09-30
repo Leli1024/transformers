@@ -767,6 +767,7 @@ class BartEncoder(BartPretrainedModel):
         output_attentions: Optional[bool] = None,
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
+        blurred_input_ids: Optional[torch.Tensor] = None,
     ) -> Union[Tuple, BaseModelOutput]:
         r"""
         Args:
@@ -826,7 +827,7 @@ class BartEncoder(BartPretrainedModel):
 
         embed_pos = self.embed_positions(input)
 
-        hidden_states = inputs_embeds + embed_pos
+        hidden_states = input_ids + embed_pos
         hidden_states = self.layernorm_embedding(hidden_states)
         hidden_states = nn.functional.dropout(hidden_states, p=self.dropout, training=self.training)
 
@@ -867,6 +868,7 @@ class BartEncoder(BartPretrainedModel):
                         hidden_states,
                         attention_mask,
                         (head_mask[idx] if head_mask is not None else None),
+                        blurred_input_ids=blurred_input_ids,
                     )
                 else:
                     layer_outputs = encoder_layer(
@@ -874,6 +876,7 @@ class BartEncoder(BartPretrainedModel):
                         attention_mask,
                         layer_head_mask=(head_mask[idx] if head_mask is not None else None),
                         output_attentions=output_attentions,
+                        blurred_input_ids=blurred_input_ids,
                     )
 
                 hidden_states = layer_outputs[0]
