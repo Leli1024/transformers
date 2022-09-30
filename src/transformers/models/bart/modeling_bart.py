@@ -198,12 +198,7 @@ class BartAttention(nn.Module):
         # if key_value_states are provided this layer is used as a cross-attention layer
         # for the decoder
         is_cross_attention = key_value_states is not None
-
-        try:
-            bsz, tgt_len, _ = hidden_states.size()
-        except:
-            bsz, tgt_len = hidden_states.size()
-        print("s: ",hidden_states.size())    
+ 
         bsz, tgt_len, _ = hidden_states.size()
         
             
@@ -853,7 +848,7 @@ class BartEncoder(BartPretrainedModel):
                     f"The head_mask should be specified for {len(self.layers)} layers, but it is for"
                     f" {head_mask.size()[0]}."
                 )
-
+        print(hidden_states.shape, blurred_input_ids.shape)
         for idx, encoder_layer in enumerate(self.layers):
             if output_hidden_states:
                 encoder_states = encoder_states + (hidden_states,)
