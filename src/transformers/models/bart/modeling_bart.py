@@ -770,6 +770,7 @@ class BartEncoder(BartPretrainedModel):
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
         blurred_input_ids: Optional[torch.Tensor] = None,
+        blurred_inputs_embeds: Optional[torch.Tensor] = None,
     ) -> Union[Tuple, BaseModelOutput]:
         r"""
         Args:
@@ -822,10 +823,11 @@ class BartEncoder(BartPretrainedModel):
         elif input_ids is not None:
             input = input_ids
             input_ids = input_ids.view(-1, input_ids.shape[-1])
-            blurred_input_ids = blurred_input_ids.view(1, blurred_input_ids.shape[-1])
+            blurred_input_ids = blurred_input_ids.view(-1, blurred_input_ids.shape[-1])
         elif inputs_embeds is not None:
             input = inputs_embeds[:, :, -1]
-            blurred_input = blurred_input_embeds[:, :, -1]
+            if (blurred_input_ids is not None):
+                blurred_input = blurred_input_embeds[:, :, -1]
         else:
             raise ValueError("You have to specify either input_ids or inputs_embeds")
 
