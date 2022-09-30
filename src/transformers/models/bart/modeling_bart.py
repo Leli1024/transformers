@@ -322,6 +322,7 @@ class BartEncoderLayer(nn.Module):
         attention_mask: torch.FloatTensor,
         layer_head_mask: torch.FloatTensor,
         output_attentions: Optional[bool] = False,
+        blurred_input_ids: Optional[torch.Tensor] = None
     ) -> Tuple[torch.FloatTensor, Optional[torch.FloatTensor]]:
         """
         Args:
@@ -341,6 +342,16 @@ class BartEncoderLayer(nn.Module):
             layer_head_mask=layer_head_mask,
             output_attentions=output_attentions,
         )
+        
+        if (blur):
+            
+            hidden_states, _, _ = self.self_attn(
+                hidden_states=blurred_input_ids,
+                attention_mask=attention_mask,
+                layer_head_mask=layer_head_mask,
+                output_attentions=output_attentions,
+            )
+            
         hidden_states = nn.functional.dropout(hidden_states, p=self.dropout, training=self.training)
         hidden_states = residual + hidden_states
         hidden_states = self.self_attn_layer_norm(hidden_states)
@@ -1157,6 +1168,7 @@ class BartDecoder(BartPretrainedModel):
             cross_attentions=all_cross_attentions,
         )
 
+blur = True
 
 @add_start_docstrings(
     "The bare BART Model outputting raw hidden-states without any specific head on top.",
@@ -1215,6 +1227,8 @@ class BartModel(BartPretrainedModel):
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
     ) -> Union[Tuple, Seq2SeqModelOutput]:
+        
+        blurred_input_ids = gaussian_noise(input_ids)
 
         # different to other models, Bart automatically creates decoder_input_ids from
         # input_ids if no decoder_input_ids are provided
@@ -1226,9 +1240,14 @@ class BartModel(BartPretrainedModel):
                     "`input_ids` or `decoder_input_ids` or `decoder_inputs_embeds`."
                 )
 
-            decoder_input_ids = shift_tokens_right(
-                input_ids, self.config.pad_token_id, self.config.decoder_start_token_id
-            )
+            if blur:
+                decoder_input_ids = shift_tokens_right(
+                    blurred_input_ids, self.config.pad_token_id, self.config.decoder_start_token_id
+                )
+            else:
+                decoder_input_ids = shift_tokens_right(
+                    input_ids, self.config.pad_token_id, self.config.decoder_start_token_id
+                )
 
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
         output_hidden_states = (
@@ -1246,6 +1265,7 @@ class BartModel(BartPretrainedModel):
                 output_attentions=output_attentions,
                 output_hidden_states=output_hidden_states,
                 return_dict=return_dict,
+                blurred_input_ids = blurred_input_ids
             )
         # If the user passed a tuple for encoder_outputs, we wrap it in a BaseModelOutput when return_dict=True
         elif return_dict and not isinstance(encoder_outputs, BaseModelOutput):
