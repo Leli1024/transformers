@@ -812,6 +812,9 @@ class BartEncoder(BartPretrainedModel):
             output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
         )
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+        
+        blurred_input = blurred_input_ids
+        blurred_inputs_embeds = None
 
         # retrieve input_ids and inputs_embeds
         if input_ids is not None and inputs_embeds is not None:
@@ -819,19 +822,28 @@ class BartEncoder(BartPretrainedModel):
         elif input_ids is not None:
             input = input_ids
             input_ids = input_ids.view(-1, input_ids.shape[-1])
+            blurred_input_ids = blurred_input_ids.view(1, blurred_input_ids.shape[-1])
         elif inputs_embeds is not None:
             input = inputs_embeds[:, :, -1]
+            blurred_input = blurred_input_embeds[:, :, -1]
         else:
             raise ValueError("You have to specify either input_ids or inputs_embeds")
 
         if inputs_embeds is None:
             inputs_embeds = self.embed_tokens(input_ids) * self.embed_scale
+            
+        if (blurred_inputs_embeds is None):
+            blurred_inputs_embeds = self.embed_tokens(blurred_input_ids) * self.embed_scale
 
         embed_pos = self.embed_positions(input)
 
         hidden_states = inputs_embeds + embed_pos
         hidden_states = self.layernorm_embedding(hidden_states)
         hidden_states = nn.functional.dropout(hidden_states, p=self.dropout, training=self.training)
+        
+        blurred_hidden_states = blurred_inputs_embeds + embed_pos
+        blurred_hidden_states = self.layernorm_embedding(blurred_hidden_states)
+        blurred_hidden_states = nn.functional.dropout(blurred_hidden_states, p=self.dropout, training=self.training)
 
         # expand attention_mask
         if attention_mask is not None:
@@ -849,8 +861,6 @@ class BartEncoder(BartPretrainedModel):
                     f" {head_mask.size()[0]}."
                 )
         #print(hidden_states.shape, blurred_input_ids.shape)
-        
-        blurred_input = ( blurred_input_ids * self.embed_scale) + embed_pos
         
         for idx, encoder_layer in enumerate(self.layers):
             if output_hidden_states:
@@ -873,7 +883,7 @@ class BartEncoder(BartPretrainedModel):
                         hidden_states,
                         attention_mask,
                         (head_mask[idx] if head_mask is not None else None),
-                        blurred_input_ids=blurred_input,
+                        blurred_input_ids=blurred_hidden_states,
                     )
                 else:
                     layer_outputs = encoder_layer(
@@ -881,7 +891,7 @@ class BartEncoder(BartPretrainedModel):
                         attention_mask,
                         layer_head_mask=(head_mask[idx] if head_mask is not None else None),
                         output_attentions=output_attentions,
-                        blurred_input_ids=blurred_input,
+                        blurred_input_ids=blurred_hidden_states,
                     )
 
                 hidden_states = layer_outputs[0]
