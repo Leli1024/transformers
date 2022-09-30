@@ -203,6 +203,9 @@ class BartAttention(nn.Module):
             bsz, tgt_len, _ = hidden_states.size()
         except:
             bsz, tgt_len = hidden_states.size()
+        print(hidden_states.size())    
+        bsz, tgt_len, _ = hidden_states.size()
+        
             
         
         # get query proj
