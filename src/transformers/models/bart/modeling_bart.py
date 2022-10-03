@@ -345,7 +345,7 @@ class BartEncoderLayer(nn.Module):
             output_attentions=output_attentions,
         )
         
-        '''
+        
         if (blurred_input_ids is not None):
             
             hidden_states, _, _ = self.self_attn(
@@ -354,8 +354,7 @@ class BartEncoderLayer(nn.Module):
                 layer_head_mask=layer_head_mask,
                 output_attentions=output_attentions,
             )
-        '''
-         
+            
         hidden_states = nn.functional.dropout(hidden_states, p=self.dropout, training=self.training)
         hidden_states = residual + hidden_states
         hidden_states = self.self_attn_layer_norm(hidden_states)
