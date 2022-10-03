@@ -844,7 +844,8 @@ class BartEncoder(BartPretrainedModel):
         hidden_states = self.layernorm_embedding(hidden_states)
         hidden_states = nn.functional.dropout(hidden_states, p=self.dropout, training=self.training)
         
-        blurred_hidden_states = blurred_inputs_embeds + self.embed_positions(blurred_input)
+        blurred_embed_pos = self.embed_positions(blurred_input)
+        blurred_hidden_states = blurred_inputs_embeds + blurred_embed_pos
         blurred_hidden_states = self.layernorm_embedding(blurred_hidden_states)
         blurred_hidden_states = nn.functional.dropout(blurred_hidden_states, p=self.dropout, training=self.training)
 
