@@ -828,7 +828,7 @@ class BartEncoder(BartPretrainedModel):
         elif inputs_embeds is not None:
             input = inputs_embeds[:, :, -1]
             if (blurred_input_ids is not None):
-                blurred_input = blurred_input_embeds[:, :, -1]
+                blurred_input = blurred_input_ids[:, :, -1]
         else:
             raise ValueError("You have to specify either input_ids or inputs_embeds")
 
@@ -836,7 +836,6 @@ class BartEncoder(BartPretrainedModel):
             inputs_embeds = self.embed_tokens(input_ids) * self.embed_scale
             
         if (blurred_inputs_embeds is None):
-            print(blurred_input_ids.shape, input_ids.shape)
             embedded_tokens =  self.embed_tokens(blurred_input_ids)
             blurred_inputs_embeds = embedded_tokens * self.embed_scale
 
