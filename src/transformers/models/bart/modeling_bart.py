@@ -836,7 +836,7 @@ class BartEncoder(BartPretrainedModel):
             inputs_embeds = self.embed_tokens(input_ids) * self.embed_scale
             
         if (blurred_inputs_embeds is None):
-            embedded_tokens =  self.embed_tokens(blurred_input_ids)
+            embedded_tokens =  self.embed_tokens(input_ids)
             blurred_inputs_embeds = embedded_tokens * self.embed_scale
 
         embed_pos = self.embed_positions(input)
