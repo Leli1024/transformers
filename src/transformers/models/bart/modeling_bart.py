@@ -812,7 +812,8 @@ class BartEncoder(BartPretrainedModel):
         elif input_ids is not None:
             input = input_ids
             input_ids = input_ids.view(-1, input_ids.shape[-1])
-            blurred_input_ids = blurred_input_ids.view(-1, blurred_input_ids.shape[-1])
+            if (blurred_input_ids is not None):
+                blurred_input_ids = blurred_input_ids.view(-1, blurred_input_ids.shape[-1])
         elif inputs_embeds is not None:
             input = inputs_embeds[:, :, -1]
             if (blurred_input_ids is not None):
@@ -823,7 +824,7 @@ class BartEncoder(BartPretrainedModel):
         if inputs_embeds is None:
             inputs_embeds = self.embed_tokens(input_ids) * self.embed_scale
             
-        if (blurred_inputs_embeds is None):
+        if (blurred_inputs_embeds is None and blurred_input_ids is not None):
             embedded_tokens =  self.embed_tokens(blurred_input_ids)
             blurred_inputs_embeds = embedded_tokens * self.embed_scale
 
@@ -833,10 +834,12 @@ class BartEncoder(BartPretrainedModel):
         hidden_states = self.layernorm_embedding(hidden_states)
         hidden_states = nn.functional.dropout(hidden_states, p=self.dropout, training=self.training)
         
-        blurred_embed_pos = self.embed_positions(blurred_input)
-        blurred_hidden_states = blurred_inputs_embeds + blurred_embed_pos
-        blurred_hidden_states = self.layernorm_embedding(blurred_hidden_states)
-        blurred_hidden_states = nn.functional.dropout(blurred_hidden_states, p=self.dropout, training=self.training)
+        blurred_hidden_states = None
+        if (blurred_input_ids is not None):
+            blurred_embed_pos = self.embed_positions(blurred_input)
+            blurred_hidden_states = blurred_inputs_embeds + blurred_embed_pos
+            blurred_hidden_states = self.layernorm_embedding(blurred_hidden_states)
+            blurred_hidden_states = nn.functional.dropout(blurred_hidden_states, p=self.dropout, training=self.training)
 
         # expand attention_mask
         if attention_mask is not None:
