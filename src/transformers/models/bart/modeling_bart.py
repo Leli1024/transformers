@@ -1240,9 +1240,9 @@ class BartModel(BartPretrainedModel):
         output_attentions: Optional[bool] = None,
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
+        blurred_input_ids: Optional[torch.Tensor] = None
     ) -> Union[Tuple, Seq2SeqModelOutput]:
         
-        blurred_input_ids = gaussian_noise(input_ids)
         blur = False
         # different to other models, Bart automatically creates decoder_input_ids from
         # input_ids if no decoder_input_ids are provided
