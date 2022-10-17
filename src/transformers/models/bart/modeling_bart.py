@@ -283,6 +283,10 @@ class BartAttention(nn.Module):
 
         attn_output = self.out_proj(attn_output)
 
+        print(attn_output)
+        print(attn_weights_reshaped)
+        print(past_key_value)
+
         return attn_output, attn_weights_reshaped, past_key_value
 
 
