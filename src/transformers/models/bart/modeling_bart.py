@@ -229,7 +229,7 @@ class BartAttention(nn.Module):
         src_len = key_states.size(1)
         attn_weights = torch.bmm(query_states, key_states.transpose(1, 2))
         
-        attn_weights = attn_weights.flip()
+        attn_weights = attn_weights.flip(dims=(1,))
 
         if attn_weights.size() != (bsz * self.num_heads, tgt_len, src_len):
             raise ValueError(
