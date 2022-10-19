@@ -226,18 +226,23 @@ class BartAttention(nn.Module):
         key_states = key_states.view(*proj_shape) #K
         value_states = value_states.view(*proj_shape) #V
 
+        '''
         print(query_states)
         print(key_states)
         print(value_states)
-
+        '''
+        
         src_len = key_states.size(1)
         attn_weights = torch.bmm(query_states, key_states.transpose(1, 2)) #Q@K
         
         #Flipping Attn weights
         attn_weights = attn_weights.flip(dims=(1,))
+        
+        '''
         print(attn_weights)
         print(attn_weights.shape)
-
+        '''
+        
         if attn_weights.size() != (bsz * self.num_heads, tgt_len, src_len):
             raise ValueError(
                 f"Attention weights should be of size {(bsz * self.num_heads, tgt_len, src_len)}, but is"
