@@ -222,14 +222,17 @@ class BartAttention(nn.Module):
             past_key_value = (key_states, value_states)
 
         proj_shape = (bsz * self.num_heads, -1, self.head_dim)
-        query_states = self._shape(query_states, tgt_len, bsz).view(*proj_shape)
-        key_states = key_states.view(*proj_shape)
-        value_states = value_states.view(*proj_shape)
+        query_states = self._shape(query_states, tgt_len, bsz).view(*proj_shape) #Q
+        key_states = key_states.view(*proj_shape) #K
+        value_states = value_states.view(*proj_shape) #V
 
         src_len = key_states.size(1)
-        attn_weights = torch.bmm(query_states, key_states.transpose(1, 2))
+        attn_weights = torch.bmm(query_states, key_states.transpose(1, 2)) #Q@K
         
+        #Flipping Attn weights
         attn_weights = attn_weights.flip(dims=(1,))
+        print(attn_weights)
+        print(attn_weights.shape)
 
         if attn_weights.size() != (bsz * self.num_heads, tgt_len, src_len):
             raise ValueError(
@@ -245,6 +248,7 @@ class BartAttention(nn.Module):
             attn_weights = attn_weights.view(bsz, self.num_heads, tgt_len, src_len) + attention_mask
             attn_weights = attn_weights.view(bsz * self.num_heads, tgt_len, src_len)
 
+        # computing the weights by a softmax operation
         attn_weights = nn.functional.softmax(attn_weights, dim=-1)
 
         if layer_head_mask is not None:
@@ -268,7 +272,7 @@ class BartAttention(nn.Module):
 
         attn_probs = nn.functional.dropout(attn_weights, p=self.dropout, training=self.training)
 
-        attn_output = torch.bmm(attn_probs, value_states)
+        attn_output = torch.bmm(attn_probs, value_states) #Weights @ V
 
         if attn_output.size() != (bsz * self.num_heads, tgt_len, self.head_dim):
             raise ValueError(
