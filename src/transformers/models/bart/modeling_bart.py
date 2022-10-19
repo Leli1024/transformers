@@ -226,6 +226,10 @@ class BartAttention(nn.Module):
         key_states = key_states.view(*proj_shape) #K
         value_states = value_states.view(*proj_shape) #V
 
+        print(query_states)
+        print(key_states)
+        print(value_states)
+
         src_len = key_states.size(1)
         attn_weights = torch.bmm(query_states, key_states.transpose(1, 2)) #Q@K
         
